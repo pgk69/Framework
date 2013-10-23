@@ -352,4 +352,32 @@ sub mk_dir {
   return $rc;
 }
 
+sub fetchFileList {
+  my $myGlob = shift;
+  
+  my (@myList, @tmpList);
+  # Test if $configfileglob contains regular files
+  @myList = glob ("'$myGlob'") ;
+  foreach my $item (@myList) {
+    $item =~ s/^["']*|["']*$//g;
+    $item = File::Spec->canonpath($item);
+    if (-T $item) {
+      push(@tmpList, $item);
+    } else {
+      if (-d $item) {
+        if (opendir(DIR, $item)) {
+          while (defined(my $file = readdir(DIR))) {
+            my $osFileName = File::Spec->catfile($item, $file);
+            if (-T $osFileName) {
+              push(@tmpList, $osFileName);
+            }
+          }
+          closedir(DIR);
+        }
+      }
+    }
+  } ## end foreach my $item (@myList)
+  return \@tmpList;
+} ## end sub fetchFileList
+
 1;

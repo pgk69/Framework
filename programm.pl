@@ -6,17 +6,17 @@ eval 'exec perl -wS $0 ${1+"$@"}'
 #                       $Revision:  $
 #                       $Author:  $
 #
-# Aufgabe:				- was tun
+# Aufgabe:        - Ausfuehrbarer Code von nmapanalyze.pl
 #
 # $Id:  $
 # $URL:  $
 #-------------------------------------------------------------------------------------------------
 
-# Letzte Aenderung: Transaktionslogik in SPLIT.pm eingefuehrt
+# Letzte Aenderung: 
 
 use 5.010;
 use strict;
-use vars qw($VERSION $SVN $OVERSION);
+use vars qw($VERSION $SVN);
 
 use constant SVN_ID => '($Id:  $)
 
@@ -31,8 +31,7 @@ $URL:  $
 
 # Extraktion der Versionsinfo aus der SVN Revision
 ($VERSION = SVN_ID) =~ s/^(.*\$Revision: )([0-9]*)(.*)$/1.0 R$2/ms;
-$SVN      = $VERSION . ' ' . SVN_ID;
-$OVERSION = $VERSION;
+$SVN = $VERSION . ' ' . SVN_ID;
 
 $| = 1;
 
@@ -117,40 +116,11 @@ if ($@) {
 $VERSION = $prg->version($VERSION);
 $prg->set_pers_Var($prg->config('DB', 'FID_DB').'.fid_config', 'Start');
 
-my $a;
-my %b;
-
-$a = $prg->config('Ausgabe', 'Log');
-$a = $prg->config('Ausgabe');
-$a = $prg->config();
-$a = $prg->config('Ausgabe', 'Frog');
-$a = $prg->config('Rausgabe', 'Frog');
-$a = $prg->config('Rausgabe');
-
-%b = $prg->config('Ausgabe', 'Log');
-%b = $prg->config('Ausgabe');
-%b = $prg->config();
-%b = $prg->config('Ausgabe', 'Frog');
-%b = $prg->config('Rausgabe', 'Frog');
-%b = $prg->config('Rausgabe');
-
-  
-
 # Test der benoetigten Kommandline-Variablen
 if ($prg->argument(0)) {
   $prg->{Eingabemaske} = $prg->argument(0)
 } else {
   $prg->{Eingabemaske} = $prg->config('Eingabe', 'Fusionsliste')
-}
-
-# Anlegen der Dateien zum Log, Error-Log und Ausgabeliste sowie FMC  
-$prg->Log('Log', $prg->config('Ausgabe', 'Log')) or $prg->Exit(1, 0, 0x00010, Utils::extendString($prg->config('Ausgabe', 'Log')));
-if (my $logrc = $prg->Log('FMC', $prg->config('Ausgabe', 'FMC'), '0111')) {
-  if ($logrc eq 'N') {
-    $prg->Log('FMC', "ERSTEINTRAG") or $prg->Exit(1, 0, 0x00010, Utils::extendString($prg->config('Ausgabe', 'FMC')));
-  }
-} else {
-  $prg->Exit(1, 0, 0x00010, $prg->config('Ausgabe', 'FMC'))
 }
 
 #--------------------------------------------------------------
