@@ -1,19 +1,36 @@
 package Utils;
 
 #-------------------------------------------------------------------------------------------------
-# Letzte Aenderung:     $Date: 2013-07-31 14:09:14 +0200 (Mi, 31. Jul 2013) $
-#                       $Revision: 1069 $
-#                       $Author: xck90n1 $
+# Letzte Aenderung:     $Date:  $
+#                       $Revision:  $
+#                       $Author:  $
 #
 # Aufgabe:				- Toolboox
 #
-# $Id: Utils.pm 1069 2013-07-31 12:09:14Z xck90n1 $
-# $URL: https://svn.fiducia.de/svn/multicom/trunk/multicom/Framework_OO/lib/Utils.pm $
+# $Id:  $
+# $URL:  $
 #-------------------------------------------------------------------------------------------------
 
 use 5.004;
 use strict;
 use open      qw(:utf8 :std);    # undeclared streams in UTF-8
+use vars qw($VERSION $SVN $OVERSION);
+
+use constant SVN_ID => '($Id:  $)
+
+$Author:  $ 
+
+$Revision:  $ 
+$Date:  $ 
+
+$URL:  $
+
+';
+
+# Extraktion der Versionsinfo aus der SVN Revision
+($VERSION = SVN_ID) =~ s/^(.*\$Revision: )([0-9]*)(.*)$/1.0 R$2/ms;
+$SVN      = $VERSION . ' ' . SVN_ID;
+$OVERSION = $VERSION;
 
 use base 'Exporter';
 

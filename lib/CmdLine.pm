@@ -1,14 +1,14 @@
 package CmdLine;
 
 #-------------------------------------------------------------------------------------------------
-# Letzte Aenderung:     $Date: 2013-07-31 14:09:14 +0200 (Mi, 31. Jul 2013) $
-#                       $Revision: 1069 $
-#                       $Author: xck90n1 $
+# Letzte Aenderung:     $Date:  $
+#                       $Revision:  $
+#                       $Author:  $
 #
 # Aufgabe:				- Kommandozeileninterpreterklasse
 #
-# $Id: CmdLine.pm 1069 2013-07-31 12:09:14Z xck90n1 $
-# $URL: https://svn.fiducia.de/svn/multicom/trunk/multicom/Framework_OO/lib/CmdLine.pm $
+# $Id:  $
+# $URL:  $
 #-------------------------------------------------------------------------------------------------
 
 use 5.004;
@@ -16,14 +16,14 @@ use strict;
 use open      qw(:utf8 :std);    # undeclared streams in UTF-8
 use vars qw($VERSION $SVN $OVERSION);
 
-use constant SVN_ID => '($Id: CmdLine.pm 1069 2013-07-31 12:09:14Z xck90n1 $)
+use constant SVN_ID => '($Id:  $)
 
-$Author: xck90n1 $ 
+$Author:  $ 
 
-$Revision: 1069 $ 
-$Date: 2013-07-31 14:09:14 +0200 (Mi, 31. Jul 2013) $ 
+$Revision:  $ 
+$Date:  $ 
 
-$URL: https://svn.fiducia.de/svn/multicom/trunk/multicom/Framework_OO/lib/CmdLine.pm $
+$URL:  $
 
 ';
 

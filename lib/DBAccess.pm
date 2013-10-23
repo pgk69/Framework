@@ -1,28 +1,28 @@
 package DBAccess;
 
 #-------------------------------------------------------------------------------------------------
-# Letzte Aenderung:     $Date: 2013-10-08 13:14:29 +0200 (Di, 08 Okt 2013) $
-#                       $Revision: 1095 $
-#                       $Author: xck90n1 $
+# Letzte Aenderung:     $Date:  $
+#                       $Revision:  $
+#                       $Author:  $
 #
 # Aufgabe:				- Datenbankzugriffsklasse
 #
-# $Id: DBAccess.pm 1095 2013-10-08 11:14:29Z xck90n1 $
-# $URL: https://svn.fiducia.de/svn/multicom/trunk/multicom/Framework_OO/lib/DBAccess.pm $
+# $Id:  $
+# $URL:  $
 #-------------------------------------------------------------------------------------------------
 
 use 5.004;
 use strict;
 use vars qw($VERSION $SVN $OVERSION);
 
-use constant SVN_ID => '($Id: DBAccess.pm 1095 2013-10-08 11:14:29Z xck90n1 $)
+use constant SVN_ID => '($Id:  $)
 
-$Author: xck90n1 $ 
+$Author:  $ 
 
-$Revision: 1095 $ 
-$Date: 2013-10-08 13:14:29 +0200 (Di, 08 Okt 2013) $ 
+$Revision:  $ 
+$Date:  $ 
 
-$URL: https://svn.fiducia.de/svn/multicom/trunk/multicom/Framework_OO/lib/DBAccess.pm $
+$URL:  $
 
 ';
 
