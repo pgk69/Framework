@@ -120,35 +120,37 @@ sub _init {
   # Zugriff auf die Datenbank
   use DBI;
 
-  my $dbms = 'DBD/' . Configuration->config('DB', 'RDBMS') . '.pm';
-  my $dbh;
+  if (Configuration->config('DB', 'RDBMS')) {
+    my $dbms = 'DBD/' . Configuration->config('DB', 'RDBMS') . '.pm';
+    my $dbh;
 
-  if (Trace->test() < 2) { 
-    eval {
-      require $dbms;
-      $dbms->import();
-    };
-    if ($@) {Trace->Exit(1, 0, 0x08001, $dbms)}
+    if (Trace->test() < 2) { 
+      eval {
+        require $dbms;
+        $dbms->import();
+      };
+      if ($@) {Trace->Exit(1, 0, 0x08001, $dbms)}
 
-    my $data_source = 'dbi:' . Configuration->config('DB', 'RDBMS') . ':' . Configuration->config('DB', 'DBNAME');
+      my $data_source = 'dbi:' . Configuration->config('DB', 'RDBMS') . ':' . Configuration->config('DB', 'DBNAME');
 
-    eval {
-      $dbh = DBI->connect(
-        $data_source,
-        Utils::extendString(Configuration->config('DB', 'USER')),
-        Utils::extendString(Configuration->config('DB', 'PASSWD')),
-        { AutoCommit => 0, RaiseError => 0, PrintError => 0 }
-      );
-    };
-    if ($@ || !defined($dbh)) {Trace->Exit(1, 0, 0x08500, $data_source, $DBI::errstr)}
-  }
-  $self->{dbh} = $dbh;
+      eval {
+        $dbh = DBI->connect(
+          $data_source,
+          Utils::extendString(Configuration->config('DB', 'USER')),
+          Utils::extendString(Configuration->config('DB', 'PASSWD')),
+          { AutoCommit => 0, RaiseError => 0, PrintError => 0 }
+        );
+      };
+      if ($@ || !defined($dbh)) {Trace->Exit(1, 0, 0x08500, $data_source, $DBI::errstr)}
+    }
+    $self->{dbh} = $dbh;
 
-  $self->{AutoCommit} = Configuration->config('DB', 'AUTOCOMMIT') || 0;
-  Trace->Trc('D', 5, 'Set Autocommit to ' . $self->{AutoCommit});
+    $self->{AutoCommit} = Configuration->config('DB', 'AUTOCOMMIT') || 0;
+    Trace->Trc('D', 5, 'Set Autocommit to ' . $self->{AutoCommit});
   
-  # Objekt erneut sichern
-  $myself = $self;
+    # Objekt erneut sichern
+    $myself = $self;
+  }
 }
 
 sub DESTROY {
@@ -246,6 +248,24 @@ sub getnextidx {
   while (defined($self->{sth}[$nextidx])) {$nextidx++}
   
   return $nextidx;
+}
+
+sub getseq {
+  #################################################################
+  # holt die naechste Sequenz Nummer
+  my $self = shift;
+
+  # Objekt wird nur einmal instanziiert, daher wird beim Zugriff
+  # die gespeicherte Methode verwendet, falls vorhanden
+  $self = $myself || $self;
+  
+  my $rc = -1;
+  
+  if (Trace->test() + $DB_RW_Mode[$idx] <= 1) {
+    $rc = ($self->{sth}[$idx]->{mysql_insertid});
+  }
+
+  return $rc;
 }
 
 sub execute {
