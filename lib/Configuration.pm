@@ -67,7 +67,7 @@ sub version {
   if (defined($pversion)) {
     $pversion =~ m/^([^\s]*)\sR([0-9]*)$/;
     my ($pVer, $pRel) = ($1, $2);
-    $VERSION = $oRel > $pRel ? "$pVer R$oRel" : "$pVer R$pRel";
+    $VERSION = $oRel gt $pRel ? "$pVer R$oRel" : "$pVer R$pRel";
   }
   
   return wantarray() ? ($VERSION, $OVERSION) : $VERSION;
