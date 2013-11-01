@@ -154,7 +154,7 @@ sub _init {
   #$self->Exit(1, 0, 0x08002, 'Ausgabe', 'SICHERUNG')       if (!defined($self->config('Ausgabe', 'SICHERUNG')));
 
   if (Configuration->config('Prg', 'LockFile')) {
-    $self->{LockFile} = Utils::extendString(Configuration->config('Prg', 'LockFile'), "BIN|$Bin|SCRIPT|" . uc($Script));
+    $self->{LockFile} = File::Spec->canonpath(Utils::extendString(Configuration->config('Prg', 'LockFile'), "BIN|$Bin|SCRIPT|" . uc($Script)));
     $self->{Lock} = LockFile::Simple->make(-max => 5, -delay => 1, -format => '%f', -autoclean => 1, -stale => 1, -wfunc => undef);
     my $errtxt;
     $SIG{'__WARN__'} = sub {$errtxt = $_[0]};
