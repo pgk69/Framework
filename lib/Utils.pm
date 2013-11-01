@@ -46,6 +46,8 @@ use FindBin qw($Bin $Script $RealBin $RealScript);
 use File::Spec;
 use File::Path qw(mkpath);
 use Time::HiRes qw(gettimeofday);
+use IO::File;
+
 # use Fcntl;
 
 # Globaler Hash zur Speicherung diverser Informationen
@@ -158,6 +160,12 @@ sub extendString {
 #  $ENV(var)$  : Umgebungsvariable var
 #  $EXEC(prg)$ : Ausgabe des Programms prg
 #
+#  BIN         : $Bin
+#  SCRIPT      : $Script
+#  REALBIN     : $Bin $RealBin
+#  REALSCRIPT  : $RealScript
+#
+#
 #  Beliebige weitere Werte koennen uebergeben werden in der Form
 #  Name|Inhalt|Name|Inhalt|Name|Inhalt....
 #  Bei der Referenzierung im String koennen diese benutzerdefinierten Variablen in sprintf-Manier
@@ -210,6 +218,11 @@ sub extendString {
   $input =~ s:\$PRG\$:$name:g;
   $input =~ s:\$PRGEXT\$:$Script:g;
   $input =~ s:\$EXT\$:$ext:g;
+
+  $input =~ s:\$BIN\$:$Bin:g;
+  $input =~ s:\$SCRIPT\$:$Script:g;
+  $input =~ s:\$REALBIN\$:$RealBin:g;
+  $input =~ s:\$REALSCRIPT\$:$RealScript:g;
 
   $input =~ s:\$ENV\(([^\)]*?)\)\$:$ENV{$1}:g;
   $input =~ s:\$EXEC\(([^\)]*?)\)\$:`$1`:ge;
@@ -379,5 +392,98 @@ sub fetchFileList {
   } ## end foreach my $item (@myList)
   return \@tmpList;
 } ## end sub fetchFileList
+
+sub writeFile {
+  ###########################################################################
+  #
+  # write file/content to disk
+  #
+  # Input: caller must provide a hash ref:
+  #           SRCFILE    => file name to be read
+  #        or SRCCONTENT => content to be read
+  #           DSTFILE    => file name to be written
+  #
+  #           FORCE      => overwrite file if it already exists
+  #           APPEND     => append to file if it already exists
+  #        APPEND wins against FORCE
+  #
+  # Output: 1: success
+  #         or undef/0 on error
+  #
+  # Example: writeFile(DSTFILE => $filename, SRCCONTENT => $data);
+  #
+  # The method will return false if the file already exists unless
+  # the optional argument FORCE is set. In this case the method will overwrite
+  # the specified file.
+  #
+  # Example: writeFile(DSTFILE => $filename, SRCCONTENT => $data, FORCE => 1);
+  #
+  my %args = (@_);
+
+  my $rc = 0;
+  
+  if ((!defined $args{SRCFILE} && !defined $args{SRCCONTENT}) || (defined $args{SRCFILE} && defined $args{SRCCONTENT})) {
+    $rc = 1;
+  }
+  
+  if (!$rc && !defined $args{DSTFILE}) {
+    $rc = 1;
+  }
+
+  my $srcfile    = $args{SRCFILE};
+  my $srccontent = $args{SRCCONTENT};
+  my $dstfile    = $args{DSTFILE};
+
+  if (!$rc && (-e $dstfile) && (!$args{FORCE}) && (!$args{APPEND})) {
+    $rc = 1;
+  }
+
+  if (!$rc && defined($srccontent)) {
+    my $mode = O_WRONLY;
+    if (!-e $dstfile) {
+      $mode |= O_EXCL | O_CREAT;
+    } else {
+      if ($args{APPEND}) {
+        $mode |= O_APPEND;
+      }
+    }
+
+    my $fh;
+    if (not sysopen($fh, $dstfile, $mode)) {
+      $rc = 1;
+    }
+    binmode $fh;
+    print {$fh} $srccontent;
+    close $fh
+  }
+  
+  if (!$rc && defined($srcfile)) {
+    if ($args{APPEND}) {
+      if (!open OUT, '>>'.$dstfile) {
+        $rc = 1;
+      }
+    } else {
+      if (!open OUT, '>'.$dstfile) {
+        $rc = 1;
+      }
+    }
+    if (!$rc) {
+      if (!open IN, $srcfile) {
+        $rc = 1;
+      }
+      if (!$rc) {
+        binmode IN;
+        binmode OUT;
+        while (<IN>) {
+          print OUT;
+        }
+        close IN;
+        close OUT;
+      }
+    }
+  }
+  return !$rc;
+} ## end sub writeFile
+
 
 1;
