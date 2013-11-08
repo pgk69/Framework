@@ -75,14 +75,18 @@ sub version {
 
   $OVERSION =~ m/^([^\s]*)\sR([0-9]*)$/;
   my ($oVer, $oRel) = ($1, $2);
-  
+  $oVer |= 0;
+  $oRel |= 0;
+
   if (defined($pversion)) {
     $pversion =~ m/^([^\s]*)\sR([0-9]*)$/;
     my ($pVer, $pRel) = ($1, $2);
+    $pVer |= 0;
+    $pRel |= 0;
     $VERSION = $oRel gt $pRel ? "$pVer R$oRel" : "$pVer R$pRel";
   }
 
-  return wantarray() ? ( $VERSION, $OVERSION ) : $VERSION;
+  return wantarray() ? ($VERSION, $OVERSION) : $VERSION;
 }
 
 sub new {
