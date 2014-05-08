@@ -47,6 +47,10 @@ use File::Spec;
 use File::Path qw(mkpath);
 use Time::HiRes qw(gettimeofday);
 use IO::File;
+use locale;
+use POSIX qw(setlocale LC_ALL);
+setlocale(LC_ALL, "de_DE.utf8");
+
 
 # use Fcntl;
 
