@@ -134,8 +134,8 @@ if (CmdLine->argument(0)) {
 }
 
 # Anlegen der Dateien zum Log, Error-Log und Ausgabeliste sowie FMC  
-Trace->Log('Log', $prg->config('Ausgabe', 'Log')) or Trace->Exit(1, 0, 0x00010, Utils::extendString(Configuration->config('Ausgabe', 'Log')));
-if (my $logrc = $prg->Log('FMC', Configuration->config('Ausgabe', 'FMC'), '0111')) {
+Trace->Log('Log', Configuration->config('Ausgabe', 'Log')) or Trace->Exit(1, 0, 0x00010, Utils::extendString(Configuration->config('Ausgabe', 'Log')));
+if (my $logrc = Trace->Log('FMC', Configuration->config('Ausgabe', 'FMC'), '0111')) {
   if ($logrc eq 'N') {
     Trace->Log('FMC', "ERSTEINTRAG") or Trace->Exit(1, 0, 0x00010, Utils::extendString(Configuration->config('Ausgabe', 'FMC')));
   }
@@ -144,10 +144,10 @@ if (my $logrc = $prg->Log('FMC', Configuration->config('Ausgabe', 'FMC'), '0111'
 }
 
 #--------------------------------------------------------------
-# PRGRAMM-Start
+# PROGRAMM-Start
 #--------------------------------------------------------------
 
-$prg->set_pers_Var(Configuration->config('DB', 'FID_DB').'.fid_config', 'Ende '.CmdLine->new()->{ArgStrgRAW});
+DBAccess->set_pers_Var(Configuration->config('DB', 'FID_DB').'.fid_config', 'Ende '.CmdLine->new()->{ArgStrgRAW});
 Trace->Exit(0, 1, 0x00002, $prg->prg, $VERSION);
 
 exit 1;
