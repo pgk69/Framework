@@ -64,23 +64,19 @@ use FindBin qw($Bin $Script $RealBin $RealScript);
 # Objektdefinition
 #
 
-# Option-Objekt: Liest und speichert die Kommandozeilenparameter
-my $cmdLine = CmdLine->new('Client'  => 'client:s',
-                           'Region'  => 'region:s',
-                           'Partner' => 'partner:s');
-$VERSION = $cmdLine->version($VERSION);
+# Kommadozeilen-Objekt: Liest und speichert die Kommandozeilenparameter
+$VERSION = CmdLine->new('Client'  => 'client:s',
+                        'Region'  => 'region:s',
+                        'Partner' => 'partner:s')->version($VERSION);
 
 # Trace-Objekt: Liest und speichert die Meldungstexte; gibt Tracemeldungen aus
-my $trace = Trace->new();
-$VERSION = $trace->version($VERSION);
+$VERSION = Trace->new()->version($VERSION);
 
 # Config-Objekt: Liest und speichert die Initialisierungsdatei
-my $config = Configuration->new();
-$VERSION = $config->version($VERSION);
+$VERSION = Configuration->new()->version($VERSION);
 
 # Datenbank-Objekt: Regelt dei Datenbankzugriffe
-my $dbaccess = DBAccess->new();
-$VERSION = $dbaccess->version($VERSION);
+$VERSION = DBAccess->new()->version($VERSION);
 
 # Kopie des Fehlerkanals erstellen zur gelegentlichen Abschaltung
 no warnings;
@@ -92,46 +88,66 @@ use warnings;
 ## main
 ##################################################################
 #
-$trace->Trc('S', 1, 0x00001, $config->prg, 
-                             $VERSION .
-                             " (" . $$ . ") " . 
-                             "Test: " . $trace->test .
-                             "  Parameter: " . $cmdLine->{ArgStrg});
-
 # Test der Komandozeilenparameter
-if (!$cmdLine->argument(0) || !$cmdLine->argument(1) ||
-     $cmdLine->option('Help')|| $cmdLine->option('Version')) {
-  $cmdLine->usage;
-  if ($cmdLine->option('Help') || $cmdLine->option('Version')) {
-    $trace->Exit(0, 1, 0x00002, $config->prg, $VERSION);
+if (!CmdLine->argument(0)    || !CmdLine->argument(1) ||
+     CmdLine->option('Help') || CmdLine->option('Version')) {
+
+  CmdLine->usage();
+  if (CmdLine->option('Help') || CmdLine->option('Version')) {
+    Trace->Exit(0, 1, 0x00002, Configuration->prg, $VERSION);
   }
-  $trace->Exit(1, 0, 0x08003, $cmdLine->{ArgStrg});
-}
+  Trace->Exit(1, 0, 0x08000, join(" ", CmdLine->argument()));
+} ## end if (!CmdLine->argument...)
 
 my $prg;
 eval {$prg = PROGRAMM->new()};
 if ($@) {
-  $prg->Exit(0, 1, 0x0ffff, $prg->prg, $VERSION);
+  Trace->Exit(0, 1, 0x0ffff, $prg->prg, $VERSION);
 }
 $VERSION = $prg->version($VERSION);
-$prg->set_pers_Var($prg->config('DB', 'FID_DB').'.fid_config', 'Start');
+DBAccess->set_pers_Var($prg->config('DB', 'FID_DB').'.fid_config', 'Start');
+
+my $a;
+my %b;
+
+$a = Configuration->config('Ausgabe', 'Log');
+$a = Configuration->config('Ausgabe');
+$a = Configuration->config();
+$a = Configuration->config('Ausgabe', 'Frog');
+$a = Configuration->config('Rausgabe', 'Frog');
+$a = Configuration->config('Rausgabe');
+
+%b = Configuration->config('Ausgabe', 'Log');
+%b = Configuration->config('Ausgabe');
+%b = Configuration->config();
+%b = Configuration->config('Ausgabe', 'Frog');
+%b = Configuration->config('Rausgabe', 'Frog');
+%b = Configuration->config('Rausgabe');
+
+  
 
 # Test der benoetigten Kommandline-Variablen
-if ($prg->argument(0)) {
-  $prg->{Eingabemaske} = $prg->argument(0)
+if (CmdLine->argument(0)) {
+  $prg->{Eingabemaske} = CmdLine->argument(0)
 } else {
-  $prg->{Eingabemaske} = $prg->config('Eingabe', 'Fusionsliste')
+  $prg->{Eingabemaske} = Configuration->config('Eingabe', 'Fusionsliste')
+}
+
+# Anlegen der Dateien zum Log, Error-Log und Ausgabeliste sowie FMC  
+Trace->Log('Log', $prg->config('Ausgabe', 'Log')) or Trace->Exit(1, 0, 0x00010, Utils::extendString(Configuration->config('Ausgabe', 'Log')));
+if (my $logrc = $prg->Log('FMC', Configuration->config('Ausgabe', 'FMC'), '0111')) {
+  if ($logrc eq 'N') {
+    Trace->Log('FMC', "ERSTEINTRAG") or Trace->Exit(1, 0, 0x00010, Utils::extendString(Configuration->config('Ausgabe', 'FMC')));
+  }
+} else {
+  Trace->Exit(1, 0, 0x00010, Configuration->config('Ausgabe', 'FMC'))
 }
 
 #--------------------------------------------------------------
 # PRGRAMM-Start
 #--------------------------------------------------------------
-$prg->Log('Log', 0x10000, $prg->version());
-$prg->Log('Log', 0x10001, $prg->prg, '', $cmdLine->{ArgStrg});
 
-
-
-$prg->set_pers_Var($prg->config('DB', 'FID_DB').'.fid_config', 'Ende '.$cmdLine->{ArgStrg});
-$prg->Exit(0, 1, 0x00002, $prg->prg, $VERSION);
+$prg->set_pers_Var(Configuration->config('DB', 'FID_DB').'.fid_config', 'Ende '.CmdLine->new()->{ArgStrgRAW});
+Trace->Exit(0, 1, 0x00002, $prg->prg, $VERSION);
 
 exit 1;

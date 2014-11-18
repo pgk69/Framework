@@ -51,7 +51,6 @@ use locale;
 use POSIX qw(setlocale LC_ALL);
 setlocale(LC_ALL, "de_DE.utf8");
 
-
 # use Fcntl;
 
 # Globaler Hash zur Speicherung diverser Informationen
@@ -168,7 +167,6 @@ sub extendString {
 #  SCRIPT      : $Script
 #  REALBIN     : $Bin $RealBin
 #  REALSCRIPT  : $RealScript
-#
 #
 #  Beliebige weitere Werte koennen uebergeben werden in der Form
 #  Name|Inhalt|Name|Inhalt|Name|Inhalt....

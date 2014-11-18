@@ -53,7 +53,7 @@
 0x00001 = Starte %s %s
 0x00002 = Beende %s %s
 
-0x00012 = Altes Lockfile gelöscht (%s).
+0x00012 = Altes Lockfile geloescht (%s).
 0x00013 = Programm <%s> kann nicht mehrfach gestartet werden (%s existiert bereits)!
 0x00014 = Lockfile <%s> angelegt.
 
@@ -112,9 +112,9 @@
 0x0100e = '  -e [<Empfangsname>] Multicom Empfangsdateiname(en) die erneut an den Host gesendet bzw. '
 0x0100f = '                      zur Bereitstellung zum Versand in das Verzeichnis, das in der INI-Datei'
 0x01010 = '                      Sektion [Eingabe] Parameter Pool, angegeben ist, gestellt werden.'
-0x01011 = '                      Sollte kein Empfangsdateiname mitgegeben worden sein wird er über STDIN'
+0x01011 = '                      Sollte kein Empfangsdateiname mitgegeben worden sein wird er ï¿½ber STDIN'
 0x01012 = '                      gelesen.'
-0x01013 = '  -b <Begleitzettel>  Begleitzetteldateiname: Alle in der Begleitzetteldatei aufgeführten'
+0x01013 = '  -b <Begleitzettel>  Begleitzetteldateiname: Alle in der Begleitzetteldatei aufgefï¿½hrten'
 0x01014 = '                      Dateien werde erneut an den Host gesendet bzw. zur Bereitstellung'
 0x01015 = '                      zum Versand in das Verzeichnis, das in der INI-Datei Sektion [Eingabe]'
 0x01016 = '                      Parameter Pool, angegeben ist, gestellt.'
@@ -123,7 +123,7 @@
 0x01019 = '                      zum Versand bereitgestellt.'
 0x0101a = ''
 0x0101b = '  Ausgangsverarbeitung:'
-0x0101c = '  -f, --force         Es wird ein ZIP-File erzeugt und an das Multicom System übergeben. Fehlt'
+0x0101c = '  -f, --force         Es wird ein ZIP-File erzeugt und an das Multicom System ï¿½bergeben. Fehlt'
 0x0101d = '                      dieser Parameter, so wird keine Ausgabedatei erzeugt.'
 0x0101e = '                      Der Inhalt der Ausgabedatei richtet sich nach der angegebenen'
 0x0101f = '                      Eingangsverarbeitung.'

@@ -79,13 +79,13 @@ sub version {
 
   $OVERSION =~ m/^([^\s]*)\sR([0-9]*)$/;
   my ($oVer, $oRel) = ($1, $2);
-  $oVer = 0 if (!$oVer);
+  $oVer = 1 if (!$oVer);
   $oRel = 0 if (!$oRel);
 
   if (defined($pversion)) {
     $pversion =~ m/^([^\s]*)\sR([0-9]*)$/;
     my ($pVer, $pRel) = ($1, $2);
-    $pVer = 0 if (!$pVer);
+    $pVer = 1 if (!$pVer);
     $pRel = 0 if (!$pRel);
     $VERSION = $oRel gt $pRel ? "$pVer R$oRel" : "$pVer R$pRel";
   }
@@ -114,6 +114,10 @@ sub _init {
   my @args = @_;
 
   $self->{Startzeit} = time();
+  
+  $VERSION = $self->version(shift(@args));
+ 
+  Trace->Trc('S', 1, 0x00001, Configuration->prg, $VERSION . " (" . $$ . ")" . " Test: " . Trace->test() . " Parameter: " . CmdLine->new()->{ArgStrgRAW});
   
   if (Configuration->config('Prg', 'Plugin')) {
 
@@ -175,8 +179,8 @@ sub _init {
       Trace->Trc('S', 1, 0x00014, $self->{LockFile})
     }
   }
-  $self->{AutoCommit} = Configuration->config('DB', 'AUTOCOMMIT') || 0;
 }
+
 
 sub DESTROY {
   #################################################################
