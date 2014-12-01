@@ -88,24 +88,13 @@ use warnings;
 ## main
 ##################################################################
 #
-# Test der Komandozeilenparameter
-if (!CmdLine->argument(0)    || !CmdLine->argument(1) ||
-     CmdLine->option('Help') || CmdLine->option('Version')) {
-
-  CmdLine->usage();
-  if (CmdLine->option('Help') || CmdLine->option('Version')) {
-    Trace->Exit(0, 1, 0x00002, Configuration->prg, $VERSION);
-  }
-  Trace->Exit(1, 0, 0x08000, join(" ", CmdLine->argument()));
-} ## end if (!CmdLine->argument...)
-
 my $prg;
 eval {$prg = PROGRAMM->new()};
 if ($@) {
-  Trace->Exit(0, 1, 0x0ffff, $prg->prg, $VERSION);
+  Trace->Exit(0, 1, 0x0ffff, Configuration->config('Prg', 'Name'), $VERSION);
 }
 $VERSION = $prg->version($VERSION);
-DBAccess->set_pers_Var($prg->config('DB', 'FID_DB').'.fid_config', 'Start');
+DBAccess->set_pers_Var(Configuration->config('DB', 'FID_DB').'.fid_config', 'Start');
 
 my $a;
 my %b;
@@ -148,6 +137,6 @@ if (my $logrc = Trace->Log('FMC', Configuration->config('Ausgabe', 'FMC'), '0111
 #--------------------------------------------------------------
 
 DBAccess->set_pers_Var(Configuration->config('DB', 'FID_DB').'.fid_config', 'Ende '.CmdLine->new()->{ArgStrgRAW});
-Trace->Exit(0, 1, 0x00002, $prg->prg, $VERSION);
+Trace->Exit(0, 1, 0x00002, Configuration->config('Prg', 'Name'), $VERSION);
 
 exit 1;

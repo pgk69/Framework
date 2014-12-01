@@ -152,14 +152,25 @@ sub _init {
   
   # Test der benoetigten INI-Variablen
   # DB-Zugriff
-  #$self->Exit(1, 0, 0x08002, 'DB', 'MC_DB')                if (!defined($self->config('DB', 'MC_DB')));
-  #$self->Exit(1, 0, 0x08002, 'DB', 'FID_DB')               if (!defined($self->config('DB', 'FID_DB')));
+  #Trace->Exit(1, 0, 0x08002, 'DB', 'MC_DB')                if (!defined(Configuration->config('DB', 'MC_DB')));
+  #Trace->Exit(1, 0, 0x08002, 'DB', 'FID_DB')               if (!defined(Configuration->config('DB', 'FID_DB')));
 
   # Ergebnisausgabe und Sicherung
-  #$self->Exit(1, 0, 0x08002, 'Ausgabe', 'Log')             if (!defined($self->config('Ausgabe', 'Log')));
-  #$self->Exit(1, 0, 0x08002, 'Ausgabe', 'Err')             if (!defined($self->config('Ausgabe', 'Err')));
-  #$self->Exit(1, 0, 0x08002, 'Ausgabe', 'Out')             if (!defined($self->config('Ausgabe', 'Out')));
-  #$self->Exit(1, 0, 0x08002, 'Ausgabe', 'SICHERUNG')       if (!defined($self->config('Ausgabe', 'SICHERUNG')));
+  #Trace->Exit(1, 0, 0x08002, 'Ausgabe', 'Log')             if (!defined(Configuration->config('Ausgabe', 'Log')));
+  #Trace->Exit(1, 0, 0x08002, 'Ausgabe', 'Err')             if (!defined(Configuration->config('Ausgabe', 'Err')));
+  #Trace->Exit(1, 0, 0x08002, 'Ausgabe', 'Out')             if (!defined(Configuration->config('Ausgabe', 'Out')));
+  #Trace->Exit(1, 0, 0x08002, 'Ausgabe', 'SICHERUNG')       if (!defined(Configuration->config('Ausgabe', 'SICHERUNG')));
+
+  # Test der Komandozeilenparameter
+  if (!CmdLine->argument(0)    || !CmdLine->argument(1) ||
+       CmdLine->option('Help') || CmdLine->option('Version')) {
+
+    CmdLine->usage();
+    if (CmdLine->option('Help') || CmdLine->option('Version')) {
+      Trace->Exit(0, 1, 0x00002, Configuration->prg, $VERSION);
+    }
+    Trace->Exit(1, 0, 0x08000, join(" ", CmdLine->argument()));
+  }
 
   if (Configuration->config('Prg', 'LockFile')) {
     $self->{LockFile} = File::Spec->canonpath(Utils::extendString(Configuration->config('Prg', 'LockFile'), "BIN|$Bin|SCRIPT|" . uc($Script)));
@@ -180,7 +191,6 @@ sub _init {
     }
   }
 }
-
 
 sub DESTROY {
   #################################################################
@@ -214,7 +224,7 @@ sub autocommit {
 
   my $merker          = $self->{subroutine};
   $self->{subroutine} = (caller(0))[3];
-  Trace->Trc('S', 1, 0x00001, $self->{subroutine}, $self->argument(0));
+  Trace->Trc('S', 1, 0x00001, $self->{subroutine}, CmdLine->argument(0));
 
   if ($self->{AutoCommit} > 0) {
     if ($self->{AutoCommit}-- == 0) {

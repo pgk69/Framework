@@ -183,17 +183,19 @@ sub autocommit {
   
   my $rc = 1;
   
-  if ($self->{AutoCommit} > 0) {
-    $self->{AutoCommit}--;
-    if ($self->{AutoCommit} <= 0) {
-      $self->{AutoCommit} = Configuration->config('DB', 'AUTOCOMMIT') || 0;
-      Trace->Trc('D', 5, 'Executing Autocommit - commit');
-      DBAccess->commit() or Trace->Exit(0x104, 0, "Error: $DBI::errstr");
+  if (%{$self}) {
+    if ($self->{AutoCommit} > 0) {
+      $self->{AutoCommit}--;
+      if ($self->{AutoCommit} <= 0) {
+        $self->{AutoCommit} = Configuration->config('DB', 'AUTOCOMMIT') || 0;
+        Trace->Trc('D', 5, 'Executing Autocommit - commit');
+        DBAccess->commit() or Trace->Exit(0x104, 0, "Error: $DBI::errstr");
+      } else {
+        Trace->Trc('D', 5, 'Executing Autocommit - no commit counter: ' . $self->{AutoCommit});
+      }
     } else {
-      Trace->Trc('D', 5, 'Executing Autocommit - no commit counter: ' . $self->{AutoCommit});
+      Trace->Trc('D', 5, 'Executing Autocommit - no autocommit set');
     }
-  } else {
-    Trace->Trc('D', 5, 'Executing Autocommit - no autocommit set');
   }
 
   # Explizite Uebergabe des Returncodes noetig, da sonst ein Fehler auftritt
@@ -213,13 +215,15 @@ sub prepare {
   
   my $rc = 1;
   
-  if (Trace->test() <= 1) {
-    $rc = ($self->{sth}[$idx] = $self->{dbh}->prepare($stmt));
-  }
+  if (%{$self}) {
+    if (Trace->test() <= 1) {
+      $rc = ($self->{sth}[$idx] = $self->{dbh}->prepare($stmt));
+    }
 
-  $DB_RW_Mode[$idx] = -1; # 0 : Read   1 : Write/Delete
-  if (uc($stmt) =~ /^SELECT /) {$DB_RW_Mode[$idx] = 0}
-  if (uc($stmt) =~ /^(UPDATE |INSERT |DELETE )/) {$DB_RW_Mode[$idx] = 1}
+    $DB_RW_Mode[$idx] = -1; # 0 : Read   1 : Write/Delete
+    if (uc($stmt) =~ /^SELECT /) {$DB_RW_Mode[$idx] = 0}
+    if (uc($stmt) =~ /^(UPDATE |INSERT |DELETE )/) {$DB_RW_Mode[$idx] = 1}
+  }
   
   return $rc;
 }
@@ -265,8 +269,10 @@ sub getseq {
   
   my $rc = -1;
   
-  if (Trace->test() + $DB_RW_Mode[$idx] <= 1) {
-    $rc = ($self->{sth}[$idx]->{mysql_insertid});
+  if (%{$self}) {
+    if (Trace->test() + $DB_RW_Mode[$idx] <= 1) {
+      $rc = ($self->{sth}[$idx]->{mysql_insertid});
+    }
   }
 
   return $rc;
@@ -285,8 +291,10 @@ sub execute {
   
   my $rc = 1;
   
-  if (Trace->test() + $DB_RW_Mode[$idx] <= 1) {
-    $rc = ($self->{sth}[$idx]->execute(@parameter));
+  if (%{$self}) {
+    if (Trace->test() + $DB_RW_Mode[$idx] <= 1) {
+      $rc = ($self->{sth}[$idx]->execute(@parameter));
+    }
   }
 
   return $rc;
@@ -303,8 +311,10 @@ sub fetchrow_array {
   
   my $rc = undef;
   
-  if (Trace->test() + $DB_RW_Mode[$idx] <= 1) {
-    $rc = $self->{sth}[$idx]->fetchrow_array();
+  if (%{$self}) {
+    if (Trace->test() + $DB_RW_Mode[$idx] <= 1) {
+      $rc = $self->{sth}[$idx]->fetchrow_array();
+    }
   }
 
   return $rc;
@@ -321,8 +331,10 @@ sub fetchrow_hashref {
   
   my $rc = undef;
   
-  if (Trace->test() + $DB_RW_Mode[$idx] <= 1) {
-    $rc = $self->{sth}[$idx]->fetchrow_hashref();
+  if (%{$self}) {
+    if (Trace->test() + $DB_RW_Mode[$idx] <= 1) {
+      $rc = $self->{sth}[$idx]->fetchrow_hashref();
+    }
   }
 
   return $rc;
@@ -340,9 +352,11 @@ sub finish {
   
   my $rc = 1;
   
-  if (Trace->test() + $DB_RW_Mode[$idx] <= 1) {
-    $rc = ($self->{sth}[$idx]->finish());
-    if ($forget) {delete($self->{sth}[$idx])}
+  if (%{$self}) {
+    if (Trace->test() + $DB_RW_Mode[$idx] <= 1) {
+      $rc = ($self->{sth}[$idx]->finish());
+      if ($forget) {delete($self->{sth}[$idx])}
+    }
   }
 
   return $rc;
@@ -359,8 +373,10 @@ sub commit {
   
   my $rc = 1;
   
-  if (Trace->test() + $DB_RW_Mode[$idx] <= 1) {
-    $rc = ($self->{dbh}->commit());
+  if (%{$self}) {
+    if (Trace->test() + $DB_RW_Mode[$idx] <= 1) {
+      $rc = ($self->{dbh}->commit());
+    }
   }
 
   return $rc;
@@ -380,17 +396,19 @@ sub set_pers_Var {
   # die gespeicherte Methode verwendet, falls vorhanden
   $self = $myself || $self;
   
-  if (defined($varname) && defined($varcontent) && !Trace->test()) {
-    $self->prepare('INSERT INTO '.$table.' VALUES (?, ?, ?, ?)')
-      or Trace->Exit(0x11d, 0, "Error: $DBI::errstr");
-    if (!$self->execute(time2str('%Y-%m-%d-%H.%M.%S', time()), Configuration->prg, $varname, $varcontent)) {
-      $self->prepare('UPDATE '.$table.' SET aktualisiert = ?, varcontent = ? WHERE programm = ? AND varname = ?')
-        or Trace->Exit(0x11e, 0, "Error: $DBI::errstr");
-      $self->execute(time2str('%Y-%m-%d-%H.%M.%S', time()), $varcontent, Configuration->prg, $varname)
-        or Trace->Exit(0x11f, 0, "Error: $DBI::errstr");
+  if (%{$self}) {
+    if (defined($varname) && defined($varcontent) && !Trace->test()) {
+      $self->prepare('INSERT INTO '.$table.' VALUES (?, ?, ?, ?)')
+        or Trace->Exit(0x11d, 0, "Error: $DBI::errstr");
+      if (!$self->execute(time2str('%Y-%m-%d-%H.%M.%S', time()), Configuration->prg, $varname, $varcontent)) {
+        $self->prepare('UPDATE '.$table.' SET aktualisiert = ?, varcontent = ? WHERE programm = ? AND varname = ?')
+          or Trace->Exit(0x11e, 0, "Error: $DBI::errstr");
+        $self->execute(time2str('%Y-%m-%d-%H.%M.%S', time()), $varcontent, Configuration->prg, $varname)
+          or Trace->Exit(0x11f, 0, "Error: $DBI::errstr");
+      }
+      $self->finish() or Trace->Exit(0x120, 0, "Error: $DBI::errstr");
+      $self->commit() or Trace->Exit(0x121, 0, "Error: $DBI::errstr");
     }
-    $self->finish() or Trace->Exit(0x120, 0, "Error: $DBI::errstr");
-    $self->commit() or Trace->Exit(0x121, 0, "Error: $DBI::errstr");
   }
 }
 
@@ -413,13 +431,15 @@ sub get_pers_Var {
   
   my $myresult;
 
-  if (defined($varname) && (Trace->test() <= 1)) {
-    $self->prepare('SELECT varcontent FROM '.$table.' WHERE programm = ? AND varname = ? WITH UR')
-      or Trace->Exit(0x11a, 0, "Error: $DBI::errstr");
-    $self->execute(Configuration->prg, $varname)
-      or Trace->Exit(0x11b, 0, "Error: $DBI::errstr");
-    if (($myresult) = $self->fetchrow_array()) {$result = $myresult}
-    $self->finish() or Trace->Exit(0x11c, 0, "Error: $DBI::errstr");
+  if (%{$self}) {
+    if (defined($varname) && (Trace->test() <= 1)) {
+      $self->prepare('SELECT varcontent FROM '.$table.' WHERE programm = ? AND varname = ? WITH UR')
+        or Trace->Exit(0x11a, 0, "Error: $DBI::errstr");
+      $self->execute(Configuration->prg, $varname)
+        or Trace->Exit(0x11b, 0, "Error: $DBI::errstr");
+      if (($myresult) = $self->fetchrow_array()) {$result = $myresult}
+      $self->finish() or Trace->Exit(0x11c, 0, "Error: $DBI::errstr");
+    }
   }
 
   return $result;
