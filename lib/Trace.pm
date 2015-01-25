@@ -608,7 +608,10 @@ sub language {      #     gibt den Sprache aus, bzw setzt sie
 }
 
 sub test {          #     gibt den Modus aus, bzw. setzt ihn
-  return _GetSetVar( shift, 'Testmode', '', @_ );
+  my $rc;
+  $rc = _GetSetVar(shift, 'Testmode', '', @_);
+  if (!defined($rc) || ($rc =~ /^\s*$/)) {$rc = 0}
+  return $rc;
 }
 
 1;
