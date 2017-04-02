@@ -70,13 +70,13 @@ $VERSION = CmdLine->new('Client'  => 'client:s',
                         'Partner' => 'partner:s')->version($VERSION);
 
 # Trace-Objekt: Liest und speichert die Meldungstexte; gibt Tracemeldungen aus
-$VERSION = Trace->new()->version($VERSION);
+$VERSION = Trace->new->version($VERSION);
 
 # Config-Objekt: Liest und speichert die Initialisierungsdatei
-$VERSION = Configuration->new()->version($VERSION);
+$VERSION = Configuration->new->version($VERSION);
 
 # Datenbank-Objekt: Regelt dei Datenbankzugriffe
-$VERSION = DBAccess->new()->version($VERSION);
+$VERSION = DBAccess->new->version($VERSION);
 
 # Kopie des Fehlerkanals erstellen zur gelegentlichen Abschaltung
 no warnings;

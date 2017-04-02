@@ -53,7 +53,6 @@ use FindBin qw($Bin $Script $RealBin $RealScript);
 use Date::Format;
 use File::Basename;
 use File::Path qw(mkpath);
-use MIME::Lite;
 use IO::Compress::Gzip qw(gzip $GzipError);
 use LockFile::Simple qw(lock trylock unlock);
 

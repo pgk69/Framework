@@ -180,17 +180,23 @@ sub extendString {
 #
   my $input   = shift || '';
   my $replace = shift || '';
+  my $default = shift;
   
-  $replace = {split(/\|/, $replace)};
+  my @dummy = split(/\|/, $replace);
+  push(@dummy, '') if (scalar @dummy % 2);
+  $replace = {@dummy};
+  
+  no warnings;
   
   # Ersetzen der uebergebenen Werte
   while (my ($key, $value) = each %$replace) {
     while ($input =~ /\$($key)(%[^\$]+)?\$/g) {
-      if ($2) {
-        $value = sprintf($2, $value);
-        $input =~ s:\$$1$2\$:$value:;
+      my ($content, $format) = ($1, $2);
+      if ($format) {
+        $value = sprintf($format, $value);
+        $input =~ s:\$$content$format\$:$value:;
       } else {
-        $input =~ s:\$$1\$:$value:;
+        $input =~ s:\$$content\$:$value:;
       }
     }
   }
@@ -228,6 +234,11 @@ sub extendString {
 
   $input =~ s:\$ENV\(([^\)]*?)\)\$:$ENV{$1}:g;
   $input =~ s:\$EXEC\(([^\)]*?)\)\$:`$1`:ge;
+
+  # Nicht ersetzte Werte entfernen
+  if (defined($default)) {
+    $input =~ s:\$([^\$]+)?\$:$default:g;
+  }
 
   return $input;
 }

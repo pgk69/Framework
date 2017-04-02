@@ -15,6 +15,7 @@ use 5.004;
 use strict;
 use open      qw(:utf8 :std);    # undeclared streams in UTF-8
 use vars qw($VERSION $SVN $OVERSION);
+no warnings;
 
 use constant SVN_ID => '($Id:  $)
 
@@ -110,20 +111,23 @@ sub _init {
   #################################################################
   #     Initialisiert ein neues Objekt
   my $self = shift;
-  my @args = @_;
+  my %args = ('Meldungstextefile' => $Bin . '/' . ( split( /\./, $Script ) )[0] . '.txt',
+              'debugLevel', 0,
+              'logConsole', 1,
+              'Language', 'default',
+              @_);
 
   # Variablen mit Defaults belegen
   #
   # intern
-  $self->{MeldungstexteFile} =
-    $Bin . '/' . ( split( /\./, $Script ) )[0] . '.txt';
+  $self->{MeldungstexteFile} = $args{Meldungstextefile};
 
   # variabel
-  $self->debugLevel(0);
+  $self->debugLevel($args{debugLevel});
   $self->logEvents('');
 
-  $self->logConsole('1');
-  $self->language('default');
+  $self->logConsole($args{logConsole});
+  $self->language($args{Language});
 
   # jetzt ist das Objekt ok und muss zur Vermeidung von Loops
   # erstmal gesichert werden
@@ -500,9 +504,10 @@ sub Meldung {
         );
       }
     }
-    $self->{Meldung}{'0x00000'} =
-      'Undefined Errorcode: %s %s %s %s %s %s %s %s %s %s'
-      if ( !exists( $self->{Meldung}{'0x00000'} ) );
+    if (!exists($self->{Meldung}{'0x00000'})) {
+      $self->{Meldung}{'0x00000'} = 'Undefined Errorcode: %s %s %s %s %s %s %s %s %s %s';
+      $id = 0x00000;
+    }
   }
 
   my $hexId = undef;

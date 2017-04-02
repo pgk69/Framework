@@ -300,6 +300,49 @@ sub execute {
   return $rc;
 }
 
+sub bind_columns {
+  #################################################################
+  # fuehrt ein DB-Statement aus
+  my $self = shift;
+
+  my $fieldhashptr      = shift;
+  my $fieldnamearrayptr = shift;
+
+  # Objekt wird nur einmal instanziiert, daher wird beim Zugriff
+  # die gespeicherte Methode verwendet, falls vorhanden
+  $self = $myself || $self;
+  
+  my $rc = 1;
+  
+  if (%{$self}) {
+    if (Trace->test() + $DB_RW_Mode[$idx] <= 1) {
+      $rc = ($self->{sth}[$idx]->bind_columns(map {\$$fieldhashptr{$_}} @{$fieldnamearrayptr}));
+    }
+  }
+
+  return $rc;
+}
+
+sub fetch {
+  #################################################################
+  # holt einen Datensatz als Array
+  my $self = shift;
+
+  # Objekt wird nur einmal instanziiert, daher wird beim Zugriff
+  # die gespeicherte Methode verwendet, falls vorhanden
+  $self = $myself || $self;
+  
+  my $rc = undef;
+  
+  if (%{$self}) {
+    if (Trace->test() + $DB_RW_Mode[$idx] <= 1) {
+      $rc = $self->{sth}[$idx]->fetch();
+    }
+  }
+
+  return $rc;
+}
+
 sub fetchrow_array {
   #################################################################
   # holt einen Datensatz als Array
@@ -391,6 +434,7 @@ sub set_pers_Var {
   my $table      = shift || undef;
   my $varname    = shift || undef;
   my $varcontent = shift || time2str('%Y-%m-%d-%H.%M.%S', time());
+  my $substitute = shift || undef;
 
   # Objekt wird nur einmal instanziiert, daher wird beim Zugriff
   # die gespeicherte Methode verwendet, falls vorhanden
@@ -398,6 +442,11 @@ sub set_pers_Var {
   
   if (%{$self}) {
     if (defined($varname) && defined($varcontent) && !Trace->test()) {
+      # Falls substitute mitgegeben wurde, wird der alte Eintrag (z.B.: Start% oder Ende% geloescht)
+      if (defined($substitute)) {
+        $self->prepare('DELETE FROM '.$table.' WHERE programm = ? AND varname LIKE ?') or Trace->Exit(0x11e, 0, "Error: $DBI::errstr");
+        $self->execute(Configuration->prg, $substitute) or Trace->Exit(0x11f, 0, "Error: $DBI::errstr");
+      }
       $self->prepare('INSERT INTO '.$table.' VALUES (?, ?, ?, ?)')
         or Trace->Exit(0x11d, 0, "Error: $DBI::errstr");
       if (!$self->execute(time2str('%Y-%m-%d-%H.%M.%S', time()), Configuration->prg, $varname, $varcontent)) {
