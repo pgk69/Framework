@@ -184,12 +184,12 @@ sub extendString {
   
   my @dummy = split(/\|/, $replace);
   push(@dummy, '') if (scalar @dummy % 2);
-  $replace = {@dummy};
+  my %replaceHash = @dummy;
   
   no warnings;
   
   # Ersetzen der uebergebenen Werte
-  while (my ($key, $value) = each %$replace) {
+  while (my ($key, $value) = each %replaceHash) {
     while ($input =~ /\$($key)(%[^\$]+)?\$/g) {
       my ($content, $format) = ($1, $2);
       if ($format) {
@@ -237,7 +237,17 @@ sub extendString {
 
   # Nicht ersetzte Werte entfernen
   if (defined($default)) {
-    $input =~ s:\$([^\$]+)?\$:$default:g;
+    while ($input =~ /\$([^\$]+)?\$/g) {
+      my $match = $1;
+      $match =~ /^([^%]*)(.*)$/;
+      my ($content, $format) = ($1, $2);
+      if ($format) {
+        my $value = sprintf($format, $default);
+        $input =~ s:\$$content$format\$:$value:g;
+      } else {
+        $input =~ s:\$$content\$:$default:g;
+      }
+    }
   }
 
   return $input;
